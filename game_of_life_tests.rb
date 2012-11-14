@@ -1,7 +1,7 @@
 require 'test/unit'
 require './game_of_life.rb'
 
-class GolTests < Test::Unit::TestCase
+class GameOfLifeTests < Test::Unit::TestCase
 
   def test_get_cells
     assert_equal([[1]], GameOfLife.get_cells("*"))
