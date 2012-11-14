@@ -4,9 +4,9 @@ require './game_of_life.rb'
 class GolTests < Test::Unit::TestCase
 
 	def test_get_cells
-		assert_equal([[1]], GameOfLife.get_cells("1 1\n*"))
+		assert_equal([[1]], GameOfLife.get_cells("*"))
 
-		generation = "3 3\n***\n...\n.*."
+		generation = "***\n...\n.*."
 
 		expected = [
 			[1, 1, 1],
@@ -15,7 +15,7 @@ class GolTests < Test::Unit::TestCase
 		]
 		assert_equal(expected, GameOfLife.get_cells(generation))
 
-		generation = "5 5\n*****\n.....\n*****\n.....\n*****"
+		generation = "*****\n.....\n*****\n.....\n*****"
 		expected = [
 			[1, 1, 1, 1, 1],
 			[0, 0, 0, 0, 0],
@@ -51,7 +51,7 @@ class GolTests < Test::Unit::TestCase
 		assert_equal(2, GameOfLife.get_row_neighbours(row, 3, false))
 	end
 
-	def test_get_live_neighbour_count_with_one_row
+	def test_get_live_neighbour_count__with_one_row
 
 		generation = [[1]]
 		assert_equal(0, GameOfLife.get_live_neighbour_count(generation, 0, 0))
@@ -68,9 +68,13 @@ class GolTests < Test::Unit::TestCase
 		generation = [[1, 0]]
 		assert_equal(1, GameOfLife.get_live_neighbour_count(generation, 0, 1))
 
+		generation = [[1, 1, 1]]
+		assert_equal(1, GameOfLife.get_live_neighbour_count(generation, 0, 0))
+		assert_equal(2, GameOfLife.get_live_neighbour_count(generation, 0, 1))
+		assert_equal(1, GameOfLife.get_live_neighbour_count(generation, 0, 2))
 	end
 
-	def test_get_live_neighbour_count_with_two_rows
+	def test_get_live_neighbour_count__with_two_rows
 		# two rows now
 		generation = [
 			[1, 0],
@@ -83,7 +87,7 @@ class GolTests < Test::Unit::TestCase
 		assert_equal(2, GameOfLife.get_live_neighbour_count(generation, 1, 1))
 	end
 
-	def test_get_live_neighbour_count_with_three_rows
+	def test_get_live_neighbour_count__with_three_rows
 		# two rows now
 		generation = [
 			[1, 0, 1],
@@ -102,7 +106,7 @@ class GolTests < Test::Unit::TestCase
 		assert_equal(3, GameOfLife.get_live_neighbour_count(generation, 2, 2))
 	end
 
-	def test_get_live_neighbour_count_with_four_rows
+	def test_get_live_neighbour_count__with_four_rows
 		# two rows now
 		generation = [
 			[1, 0, 1, 0],
@@ -159,4 +163,82 @@ class GolTests < Test::Unit::TestCase
 			assert_equal(0, GameOfLife.evolve_cell(0, neighbour_count))
 		end
 	end
+
+	def test_get_formatted_row
+		row = [0]
+		assert_equal(".\n", GameOfLife.get_formatted_row(row))
+
+		row = [1]
+		assert_equal("*\n", GameOfLife.get_formatted_row(row))
+
+		row = [1, 0]
+		assert_equal("*.\n", GameOfLife.get_formatted_row(row))
+
+		row = [1, 0, 1, 1, 1, 0, 0, 1]
+		assert_equal("*.***..*\n", GameOfLife.get_formatted_row(row))
+	end
+
+	def test_evolve
+
+		second = GameOfLife.evolve(".\n")
+		expected = ".\n"
+		assert_equal(expected, second)
+
+		second = GameOfLife.evolve(".*\n")
+		expected = "..\n"
+		assert_equal(expected, second)
+
+		second = GameOfLife.evolve("***\n")
+		expected = ".*.\n"
+		assert_equal(expected, second)
+
+		# test some blocks
+		first = "....\n" +
+						".**.\n" +
+						".**.\n" +
+						"....\n"
+						
+		expected_second = first
+		assert_equal(expected_second, GameOfLife.evolve(first))
+
+		first = "......\n" +
+						"..**..\n" +
+						".*..*.\n" +
+						"..**..\n" +
+						"....\n"
+						
+		expected_second = first
+		assert_equal(expected_second, GameOfLife.evolve(first))
+
+		# test some oscillators
+		first = ".....\n" +
+						".....\n" +
+						".***.\n" +
+						".....\n" + 
+						".....\n"
+						
+		expected_second = ".....\n" +
+											"..*..\n" +
+											"..*..\n" +
+											"..*..\n" + 
+											".....\n"
+		assert_equal(expected_second, GameOfLife.evolve(first))
+
+		first = "......\n" +
+						".**...\n" +
+						".*....\n" +
+						"....*.\n" + 
+						"...**.\n" +
+						"......\n"
+						
+		expected_second = "......\n" +
+											".**...\n" +
+											".**...\n" +
+											"...**.\n" + 
+											"...**.\n" +
+											"......\n"
+		assert_equal(expected_second, GameOfLife.evolve(first))
+	end
+
+	
 end
