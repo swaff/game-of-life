@@ -4,25 +4,14 @@ require './game_of_life.rb'
 class GameOfLifeTests < Test::Unit::TestCase
 
   def test_get_cells
-    assert_equal([[1]], GameOfLife.get_cells("*"))
+    assert_equal(['*'], GameOfLife.get_cells("*"))
 
     generation = "***\n...\n.*."
-
-    expected = [
-      [1, 1, 1],
-      [0, 0, 0],
-      [0, 1, 0]
-    ]
+    expected = ['***', '...', '.*.']
     assert_equal(expected, GameOfLife.get_cells(generation))
 
     generation = "*****\n.....\n*****\n.....\n*****"
-    expected = [
-      [1, 1, 1, 1, 1],
-      [0, 0, 0, 0, 0],
-      [1, 1, 1, 1, 1],
-      [0, 0, 0, 0, 0],
-      [1, 1, 1, 1, 1]
-    ]
+    expected = ['*****', '.....', '*****', '.....', '*****']
     assert_equal(expected, GameOfLife.get_cells(generation))
   end
 
@@ -31,16 +20,16 @@ class GameOfLifeTests < Test::Unit::TestCase
     row = nil
     assert_equal(0, GameOfLife.get_row_neighbours(row, 0))
 
-    row = [0]
+    row = '.'
     assert_equal(0, GameOfLife.get_row_neighbours(row, 0))
 
-    row = [1]
+    row = '*'
     assert_equal(1, GameOfLife.get_row_neighbours(row, 0))
 
-    row = [1]
+    row = '*'
     assert_equal(0, GameOfLife.get_row_neighbours(row, 0, true))
 
-    row = [0, 0, 1, 1]
+    row = '..**'
     assert_equal(0, GameOfLife.get_row_neighbours(row, 0, true))
     assert_equal(0, GameOfLife.get_row_neighbours(row, 0, false))
     assert_equal(1, GameOfLife.get_row_neighbours(row, 1, true))
@@ -53,22 +42,22 @@ class GameOfLifeTests < Test::Unit::TestCase
 
   def test_get_live_neighbour_count__with_one_row
 
-    generation = [[1]]
+    generation = ['*']
     assert_equal(0, GameOfLife.get_live_neighbour_count(generation, 0, 0))
 
-    generation = [[1, 1]]
+    generation = ['**']
     assert_equal(1, GameOfLife.get_live_neighbour_count(generation, 0, 0))
 
-    generation = [[1, 1]]
+    generation = ['**']
     assert_equal(1, GameOfLife.get_live_neighbour_count(generation, 0, 1))
 
-    generation = [[0, 1]]
+    generation = ['.*']
     assert_equal(1, GameOfLife.get_live_neighbour_count(generation, 0, 0))
 
-    generation = [[1, 0]]
+    generation = ['*.']
     assert_equal(1, GameOfLife.get_live_neighbour_count(generation, 0, 1))
 
-    generation = [[1, 1, 1]]
+    generation = ['***']
     assert_equal(1, GameOfLife.get_live_neighbour_count(generation, 0, 0))
     assert_equal(2, GameOfLife.get_live_neighbour_count(generation, 0, 1))
     assert_equal(1, GameOfLife.get_live_neighbour_count(generation, 0, 2))
@@ -77,8 +66,8 @@ class GameOfLifeTests < Test::Unit::TestCase
   def test_get_live_neighbour_count__with_two_rows
     # two rows now
     generation = [
-      [1, 0],
-      [1, 1]
+      '*.', 
+      '**'
     ]
 
     assert_equal(2, GameOfLife.get_live_neighbour_count(generation, 0, 0))
@@ -90,9 +79,9 @@ class GameOfLifeTests < Test::Unit::TestCase
   def test_get_live_neighbour_count__with_three_rows
     # two rows now
     generation = [
-      [1, 0, 1],
-      [1, 1, 1],
-      [0, 1, 1]
+      '*.*',
+      '***',
+      '.**'
     ]
 
     assert_equal(2, GameOfLife.get_live_neighbour_count(generation, 0, 0))
@@ -109,10 +98,10 @@ class GameOfLifeTests < Test::Unit::TestCase
   def test_get_live_neighbour_count__with_four_rows
     # two rows now
     generation = [
-      [1, 0, 1, 0],
-      [1, 0, 1, 1],
-      [1, 1, 1, 0],
-      [0, 1, 1, 1]
+      '*.*.',
+      '*.**',
+      '***.',
+      '.***'
     ]
 
     assert_equal(1, GameOfLife.get_live_neighbour_count(generation, 0, 0))
@@ -134,48 +123,34 @@ class GameOfLifeTests < Test::Unit::TestCase
   end
 
   def test_evolve_cell__live_cell_with_fewer_than_two_live_neighbours_dies
-    assert_equal(0, GameOfLife.evolve_cell(1, 0))
-    assert_equal(0, GameOfLife.evolve_cell(1, 1))
+    assert_equal('.', GameOfLife.evolve_cell('*', 0))
+    assert_equal('.', GameOfLife.evolve_cell('*', 1))
   end
 
   def test_evolve_cell__live_cell_with_two_or_three_live_neighbours_lives_on
 
-    assert_equal(1, GameOfLife.evolve_cell(1, 2))
-    assert_equal(1, GameOfLife.evolve_cell(1, 3))
+    assert_equal('*', GameOfLife.evolve_cell('*', 2))
+    assert_equal('*', GameOfLife.evolve_cell('*', 3))
   end
 
   def test_evolve_cell__live_cell_with_more_than_three_live_neighbours_dies
 
     4.upto(8) do |neighbour_count|
-      assert_equal(0, GameOfLife.evolve_cell(1, neighbour_count))
+      assert_equal('.', GameOfLife.evolve_cell('*', neighbour_count))
     end
   end
 
   def test_evolve_cell__dead_cell_with_exactly_three_live_neighbours_becomes_a_live_cell
 
     0.upto(2) do |neighbour_count|
-      assert_equal(0, GameOfLife.evolve_cell(0, neighbour_count))
+      assert_equal('.', GameOfLife.evolve_cell('.', neighbour_count))
     end
 
-    assert_equal(1, GameOfLife.evolve_cell(0, 3))
+    assert_equal('*', GameOfLife.evolve_cell('.', 3))
 
     4.upto(8) do |neighbour_count|
-      assert_equal(0, GameOfLife.evolve_cell(0, neighbour_count))
+      assert_equal('.', GameOfLife.evolve_cell('.', neighbour_count))
     end
-  end
-
-  def test_get_formatted_row
-    row = [0]
-    assert_equal(".\n", GameOfLife.get_formatted_row(row))
-
-    row = [1]
-    assert_equal("*\n", GameOfLife.get_formatted_row(row))
-
-    row = [1, 0]
-    assert_equal("*.\n", GameOfLife.get_formatted_row(row))
-
-    row = [1, 0, 1, 1, 1, 0, 0, 1]
-    assert_equal("*.***..*\n", GameOfLife.get_formatted_row(row))
   end
 
   def test_evolve
@@ -239,6 +214,4 @@ class GameOfLifeTests < Test::Unit::TestCase
                       "......\n"
     assert_equal(expected_second, GameOfLife.evolve(first))
   end
-
-  
 end
